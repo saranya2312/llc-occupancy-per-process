@@ -13,6 +13,7 @@
 #include "cpupri.h"
 #include "cpudeadline.h"
 #include "cpuacct.h"
+#include "../../arch/x86/include/asm/msr.h"
 
 struct rq;
 struct cpuidle_state;
@@ -20,6 +21,14 @@ struct cpuidle_state;
 /* task_struct::on_rq states: */
 #define TASK_ON_RQ_QUEUED	1
 #define TASK_ON_RQ_MIGRATING	2
+
+
+/*  For LLC occupancy */
+#define MSR_IA32_PQR_ASSOC      0x0c8f
+#define MSR_IA32_QM_CTR         0x0c8e
+#define MSR_IA32_QM_EVTSEL      0x0c8d
+#define QOS_L3_OCCUP_EVENT_ID   (1 << 0)
+
 
 extern __read_mostly int scheduler_running;
 
@@ -1760,3 +1769,28 @@ static inline u64 irq_time_read(int cpu)
 }
 #endif /* CONFIG_64BIT */
 #endif /* CONFIG_IRQ_TIME_ACCOUNTING */
+
+/* For LLC occupancy */
+static u64 __rmid_read(u32 rmid)
+{
+        u64 val;
+
+        wrmsr(MSR_IA32_QM_EVTSEL, QOS_L3_OCCUP_EVENT_ID, rmid);
+        rdmsrl(MSR_IA32_QM_CTR, val);
+
+        return val;
+}
+
+static void start_mon_llc_for_process(int cpu_id)
+{
+        u32 rmid = cpu_id;
+        //Map with core-id. This way we need only core number of rmids;
+
+        wrmsr(MSR_IA32_PQR_ASSOC, rmid, 0);
+}
+
+static void stop_mon_llc_for_process(int cpu_id)
+{
+                wrmsr(MSR_IA32_PQR_ASSOC, 0, 0);
+}
+

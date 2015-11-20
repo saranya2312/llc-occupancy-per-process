@@ -3119,6 +3119,9 @@ static void __sched __schedule(void)
 		rq->curr = next;
 		++*switch_count;
 
+                prev->llc_occupancy = __rmid_read(cpu);
+                stop_mon_llc_for_process(cpu);
+                start_mon_llc_for_process(cpu);
 		rq = context_switch(rq, prev, next); /* unlocks the rq */
 		cpu = cpu_of(rq);
 	} else {
