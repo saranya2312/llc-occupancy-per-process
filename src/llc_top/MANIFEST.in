@@ -1,0 +1,8 @@
+include .gitignore
+include COPYING
+include ChangeLog
+include NEWS
+include README
+include THANKS
+include iotop.8
+include iotop.py
