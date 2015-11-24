@@ -534,7 +534,7 @@ static int do_task_stat(struct seq_file *m, struct pid_namespace *ns,
 	else
 		seq_put_decimal_ll(m, ' ', 0);
  
-	task->llc_occupancy =555;
+	//task->llc_occupancy =555;
         seq_put_decimal_ull(m, ' ', task->llc_occupancy);
 
 	seq_putc(m, '\n');
